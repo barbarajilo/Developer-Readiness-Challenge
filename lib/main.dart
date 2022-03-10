@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drc/Authorization/auth_helper.dart';
+import 'package:drc/Authorization/verif_email.dart';
 import 'package:drc/screens/landing_page.dart';
 import 'package:drc/screens/main_nav_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -71,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
                     final userDoc = snapshot.data;
                     final user = userDoc!.data() as Map;
                     email = user['email'];
-                    print(email);
+
                     if (user['role'] == 'user') {
                       return StreamBuilder(
                           stream: FirebaseFirestore.instance
@@ -83,7 +84,9 @@ class _MainScreenState extends State<MainScreen> {
                               AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (snapshot.hasData) {
                               if (snapshot.data!.docs.isEmpty) {
-                                return AddNote(apiToken: value, email: email);
+                                return VerifyEmailPage(
+                                    apiToken: value, email: email);
+                                // return AddNote(apiToken: value, email: email);
                               } else {
                                 final docs = snapshot.data!.docs;
                                 final v = docs[0].data() as Map;
@@ -109,6 +112,7 @@ class _MainScreenState extends State<MainScreen> {
             }
 
             return MaterialApp(
+              debugShowCheckedModeBanner: false,
               title: 'Flutter Demo',
               theme: ThemeData(
                 primarySwatch: Colors.blue,
