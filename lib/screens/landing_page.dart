@@ -1,4 +1,4 @@
-import 'package:drc/screens/Signup_page.dart';
+import 'package:drc/screens/signup_page.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import './login_page.dart';
@@ -70,7 +70,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                       fontSize: 25),
                                   children: <TextSpan>[
                                     TextSpan(
-                                        text: 'Assertive',
+                                        text: 'Anticipated',
                                         style: TextStyle(
                                             color: Colors.redAccent,
                                             fontWeight: FontWeight.bold,
@@ -103,21 +103,21 @@ class _LandingScreenState extends State<LandingScreen> {
               ),
               const SizedBox(height: 80),
               const Text(
-                'Join us in this radical journey to \ntrack your trading portfolio',
+                'Be anticipated and make a radical \nmove with diversified strategy',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
-                    fontSize: 20),
+                    fontSize: 18),
               ),
               const SizedBox(height: 30),
               ElevatedButton(
                 child: const Text(
-                  'Login',
+                  'Log in',
                   style: TextStyle(
-                      color: Colors.blueAccent,
+                      color: Color(0xFFF305FAD),
                       fontWeight: FontWeight.w500,
-                      fontSize: 20),
+                      fontSize: 18),
                 ),
                 onPressed: () {
                   Navigator.push(context,
@@ -126,7 +126,9 @@ class _LandingScreenState extends State<LandingScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                     primary: Colors.white,
-                    fixedSize: const Size(300, 50),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    fixedSize: Size(300, 50),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10))),
               ),
@@ -137,7 +139,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
-                      fontSize: 20),
+                      fontSize: 18),
                 ),
                 onPressed: () {
                   Navigator.push(context,
@@ -145,7 +147,7 @@ class _LandingScreenState extends State<LandingScreen> {
              
                 },
                 style: ElevatedButton.styleFrom(
-                    primary: Colors.blueAccent,
+                    primary: Color(0xFFF305FAD),
                     fixedSize: const Size(300, 50),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10))),

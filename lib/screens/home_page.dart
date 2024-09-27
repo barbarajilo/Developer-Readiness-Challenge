@@ -1,32 +1,38 @@
 // ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, camel_case_types
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final String value1;
+
+  const HomePage(this.value1, {Key? key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState(value1);
 }
 
 class _HomePageState extends State<HomePage> {
+  String value1;
+  _HomePageState(this.value1, {Key? key});
+
   String username = "User";
-  String apiToken = "5dRHsXj0xsjBEJC";
+
   num balance = 0.0;
   int winsCount = 0;
   int lossCount = 0;
   num profit = 0;
   num loss = 0;
-  var assetList = ['BTC/USD', 'EUR/USD', 'ETH/USD', 'Gold'];
+  var assetName = ['BTC/USD', 'EUR/USD', 'ETH/USD', 'Gold'];
+  var assetIcon = ['assets/icons/btc_usd.png', 'assets/icons/eur_usd.png', 'assets/icons/eth_usd.png', 'assets/icons/gold.png'];
 
   final channel = IOWebSocketChannel.connect(
       Uri.parse('wss://ws.binaryws.com/websockets/v3?app_id=1089'));
 
   void sendAuth() {
-    channel.sink.add('{"authorize": "$apiToken"}');
+    channel.sink.add('{"authorize": "$value1"}');
   }
 
   void getStatement() {
@@ -54,7 +60,7 @@ class _HomePageState extends State<HomePage> {
                 height: 250,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Color(0xFF1F96B0),
+                  color: Theme.of(context).appBarTheme.backgroundColor,
                   borderRadius: BorderRadius.only(
                     bottomRight: Radius.circular(50),
                     bottomLeft: Radius.circular(50),
@@ -74,9 +80,19 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.settings,
-                              size: 50,
+                            child: IconButton(
+                              icon: Icon(Icons.settings,
+                                  color: Theme.of(context).iconTheme.color),
+                              iconSize: 40,
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        SettingsPage(value: value1),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -96,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                       title: Text(
                         "Hi, $username",
                         style: TextStyle(
-                          fontSize: 34,
+                          fontSize: 30,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -105,8 +121,9 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           "Dashboard",
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.subtitle1?.color,
                           ),
                         ),
                       ),
@@ -134,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                       child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        itemCount: assetList.length,
+                        itemCount: assetName.length,
                         itemBuilder: ((context, index) {
                           return SizedBox(
                             height: 80,
@@ -145,12 +162,13 @@ class _HomePageState extends State<HomePage> {
                                 children: [
                                   Expanded(
                                     child: Image.asset(
-                                        'assets/images/ethereum.png'),
+                                        assetIcon[index]),
+                                    // child: Image.network(assetIcon[index]),
                                   ),
                                   Text(
-                                    assetList[index],
+                                    assetName[index],
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Theme.of(context).primaryColor,
                                     ),
                                   )
                                 ]),
@@ -168,170 +186,184 @@ class _HomePageState extends State<HomePage> {
           height: 10,
         ),
         Expanded(
-            child: GridView.count(
-          primary: false,
-          padding: const EdgeInsets.all(20),
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 20,
-          crossAxisCount: 2,
-          children: <Widget>[
-            // Displays Balance for the user account
-            Container(
-              decoration: BoxDecoration(
-                color: Color(0xFF930077),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Account",
-                    style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "Balance",
-                    style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "$balance USD",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Displays wins and losses
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Container(
+          child: (loss != 0)
+              ? GridView.count(
+                  primary: false,
+                  padding: const EdgeInsets.all(20),
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 20,
+                  crossAxisCount: 2,
+                  children: <Widget>[
+                    // Displays Balance for the user account
+                    Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFFFFBD39),
+                        color: Color(0xFF930077),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Center(
-                        child: ListTile(
-                          leading: Text(
-                            "Wins    ",
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Account\nBalance",
                             style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 24,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text(
-                            "$winsCount",
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "$balance USD",
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 24,
+                              color: Colors.white,
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Expanded(
-                    child: Container(
+
+                    // Displays wins and losses
+                    Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFFFFBD39),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: ListTile(
+                                  leading: Text(
+                                    "Wins    ",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    "$winsCount",
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFF73B8C8),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: ListTile(
+                                  leading: Text(
+                                    "Losses",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                  ),
+                                  subtitle: Text(
+                                    "$lossCount",
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Displays Total Profit
+                    Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFF1F96B0),
+                        color: Color(0xFF36622B),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Center(
-                        child: ListTile(
-                          leading: Text(
-                            "Losses",
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Total Profit",
                             style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 24,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text(
-                            "$lossCount",
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "+${profit.toStringAsFixed(2)}",
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 24,
+                              color: Colors.white,
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Displays Total Profit
-            Container(
-              decoration: BoxDecoration(
-                color: Color(0xFF36622B),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Total Profit",
-                    style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "+${profit.toStringAsFixed(2)}",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE84545),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Total Loss",
+                            style: TextStyle(
+                                fontSize: 24,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            loss.toStringAsFixed(2),
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Color(0xFFE84545),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Total Loss",
-                    style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    loss.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ))
+                  ],
+                )
+              : Center(
+                  child: Container(
+                      padding: const EdgeInsets.all(100),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 10),
+                          Text('Loading...'),
+                        ],
+                      )),
+                ),
+        )
       ],
     );
   }
@@ -344,15 +376,36 @@ class _HomePageState extends State<HomePage> {
 
     channel.stream.listen((data) {
       var response = jsonDecode(data);
-
-      if (response['msg_type'] == 'authorize') {
+      // debugPrint(response.toString());
+      if (response['msg_type'] == 'authorize' && response['error'] == null) {
         getStatement();
-        setState(() {
-          balance = response['authorize']['balance'];
+        if (mounted) {
+          setState(() {
+            balance = response['authorize']['balance'];
 
-          username = response['authorize']['email']
-              .substring(0, response['authorize']['email'].indexOf('@'));
-        });
+            username = response['authorize']['email']
+                .substring(0, response['authorize']['email'].indexOf('@'));
+          });
+        }
+      } else if (response['msg_type'] == 'authorize' &&
+          response['error']['code'] == 'InvalidToken') {
+        showDialog(
+          context: context,
+          builder: (BuildContext ctxt) {
+            return AlertDialog(
+              title: Text(
+                  "${response['error']['message']} Please go to Profile Page and change the API Token."),
+              actions: <Widget>[
+                TextButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                    Navigator.of(ctxt).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
       }
 
       if (response['msg_type'] == 'statement') {
@@ -394,12 +447,14 @@ class _HomePageState extends State<HomePage> {
             }
           }
         }
-        setState(() {
-          winsCount = tempWins;
-          lossCount = tempLoss;
-          profit = tempProfit;
-          loss = tempLosses;
-        });
+        if (mounted) {
+          setState(() {
+            winsCount = tempWins;
+            lossCount = tempLoss;
+            profit = tempProfit;
+            loss = tempLosses;
+          });
+        }
       }
     });
   }
